@@ -1,0 +1,108 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+ * TechBirds Design Tokens — single source of truth (per Master Spec §6)
+ * One ink. One paper. One accent (cyan #0EA5E9). 8pt grid. Two weights.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Ink (text) ──────────────────────────────────────────────────────── */
+  --ink-900: #0b1220;
+  --ink-700: #1f2937;
+  --ink-500: #5b6675;
+  --ink-300: #94a3b8;
+
+  /* ── Paper (surfaces) ────────────────────────────────────────────────── */
+  --paper: #ffffff;
+  --paper-2: #f8fafc;
+  --paper-3: #eef2f6;
+  --line: #e5e9ef;
+
+  /* ── Accent — cyan only ──────────────────────────────────────────────── */
+  --accent-50: #e0f2fe;
+  --accent-500: #0ea5e9;
+  --accent-600: #0284c7;
+
+  /* ── Semantic ────────────────────────────────────────────────────────── */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  /* ── Spacing — 8pt grid ──────────────────────────────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 128px;
+
+  /* ── Container ───────────────────────────────────────────────────────── */
+  --container-max: 1280px;
+  --container-pad: 40px;
+
+  /* ── Radius ──────────────────────────────────────────────────────────── */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+
+  /* ── Motion ──────────────────────────────────────────────────────────── */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+  --dur-4: 520ms;
+  --dur-5: 720ms;
+
+  /* ── Typography family ───────────────────────────────────────────────── */
+  --font-sans: "Inter Variable", "Inter", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Söhne Mono", "JetBrains Mono", "Fira Code", ui-monospace,
+    SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+/* ── Dark mode ─────────────────────────────────────────────────────────── */
+:root[data-theme="dark"],
+.dark {
+  --paper: #06080c;
+  --paper-2: #0b0f17;
+  --paper-3: #111826;
+  --line: rgba(255, 255, 255, 0.08);
+  --ink-900: #e6eaf2;
+  --ink-700: #c2c9d6;
+  --ink-500: #9aa3b2;
+  --ink-300: #5b6675;
+}
+
+/* ── Reset baseline ────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink-900);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,6 @@
+@import "@techbirds/ui-kit/tokens.css";
+@import "@techbirds/ui-kit/fonts.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

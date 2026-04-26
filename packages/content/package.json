@@ -1,0 +1,20 @@
+{
+  "name": "@techbirds/content",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "lint": "echo \"(content lint placeholder)\"",
+    "typecheck": "tsc --noEmit",
+    "build": "echo \"(consumed as source)\"",
+    "test": "echo \"(no tests yet)\"",
+    "clean": "rimraf .turbo dist"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "typescript": "^5.6.3"
+  }
+}

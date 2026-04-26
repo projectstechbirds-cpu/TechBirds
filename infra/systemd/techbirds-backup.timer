@@ -1,0 +1,12 @@
+[Unit]
+Description=Run TechBirds Postgres backup nightly at 02:30 UTC
+Documentation=file:///srv/techbirds/api/infra/scripts/backup_db.sh
+
+[Timer]
+OnCalendar=*-*-* 02:30:00 UTC
+Persistent=true
+RandomizedDelaySec=600
+Unit=techbirds-backup.service
+
+[Install]
+WantedBy=timers.target

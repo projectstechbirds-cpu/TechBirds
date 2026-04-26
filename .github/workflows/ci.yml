@@ -1,0 +1,102 @@
+name: CI / CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+env:
+  NODE_VERSION: "20"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  frontends:
+    name: Lint • Typecheck • Build (frontends)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npx turbo run lint typecheck build
+
+  api:
+    name: Lint • Test (FastAPI)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: techbirds
+          POSTGRES_PASSWORD: techbirds
+          POSTGRES_DB: techbirds_db_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: apps/api/pyproject.toml
+      - name: Install API deps
+        working-directory: apps/api
+        run: pip install -e ".[dev]"
+      - name: Lint
+        working-directory: apps/api
+        run: ruff check .
+      - name: Run migrations
+        working-directory: apps/api
+        env:
+          DATABASE_URL_SYNC: postgresql+psycopg://techbirds:techbirds@localhost:5432/techbirds_db_test
+        run: alembic upgrade head
+      - name: Run tests
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgresql+asyncpg://techbirds:techbirds@localhost:5432/techbirds_db_test
+          DATABASE_URL_SYNC: postgresql+psycopg://techbirds:techbirds@localhost:5432/techbirds_db_test
+          REDIS_URL_CACHE: redis://localhost:6379/0
+          REDIS_URL_CELERY: redis://localhost:6379/1
+          REDIS_URL_SESSIONS: redis://localhost:6379/2
+          REDIS_URL_RATELIMIT: redis://localhost:6379/3
+          SECRET_KEY: ci-test-secret
+          ENVIRONMENT: test
+        run: pytest -q
+
+  deploy:
+    name: Deploy to KVM1
+    needs: [frontends, api]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "${{ env.NODE_VERSION }}"
+          cache: npm
+      - run: npm ci
+      - run: npx turbo run build --filter=@techbirds/www --filter=@techbirds/blog --filter=@techbirds/app
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.KVM1_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.KVM1_HOST }} >> ~/.ssh/known_hosts
+      - name: Rsync frontends
+        run: |
+          rsync -avz --delete apps/www/dist/  deploy@${{ secrets.KVM1_HOST }}:/var/www/techbirds/www/dist/
+          rsync -avz --delete apps/blog/dist/ deploy@${{ secrets.KVM1_HOST }}:/var/www/techbirds/blog/dist/
+          rsync -avz --delete apps/app/dist/  deploy@${{ secrets.KVM1_HOST }}:/var/www/techbirds/app/dist/
+      - name: Deploy API
+        run: |
+          ssh deploy@${{ secrets.KVM1_HOST }} 'cd /srv/techbirds/api && git pull && \
+            source .venv/bin/activate && pip install -e ".[prod]" && \
+            alembic upgrade head && \
+            sudo systemctl restart techbirds-api techbirds-worker techbirds-beat && \
+            sudo systemctl reload nginx'

@@ -1,0 +1,27 @@
+[Unit]
+Description=TechBirds Celery worker
+After=network.target redis-server.service postgresql.service
+Wants=redis-server.service postgresql.service
+
+[Service]
+Type=simple
+User=techbirds
+Group=techbirds
+WorkingDirectory=/srv/techbirds/api
+EnvironmentFile=/srv/techbirds/api/.env
+ExecStart=/srv/techbirds/api/.venv/bin/celery -A app.tasks.celery_app worker \
+    --loglevel=info \
+    --concurrency=4
+Restart=on-failure
+RestartSec=5s
+KillSignal=SIGTERM
+TimeoutStopSec=60s
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/techbirds/api/var
+
+[Install]
+WantedBy=multi-user.target

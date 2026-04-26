@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Payslip — {{ employee_name }} — {{ period_label }}</title>
+    <style>
+      @page { size: A4; margin: 18mm; }
+      * { box-sizing: border-box; }
+      body { font-family: "Inter", "Helvetica Neue", Arial, sans-serif; color: #111827; font-size: 11pt; }
+      h1 { font-size: 16pt; margin: 0 0 4mm 0; letter-spacing: -0.01em; }
+      .muted { color: #6b7280; }
+      .header { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 6mm; border-bottom: 1px solid #e5e7eb; }
+      .meta { margin-top: 6mm; display: grid; grid-template-columns: 1fr 1fr; gap: 4mm 8mm; }
+      .meta div { font-size: 10pt; }
+      .meta strong { display: block; color: #111827; }
+      .meta span { color: #6b7280; }
+      table { width: 100%; border-collapse: collapse; margin-top: 6mm; }
+      th, td { padding: 2.5mm 3mm; text-align: left; font-size: 10pt; }
+      th { background: #f9fafb; color: #374151; font-weight: 600; border-bottom: 1px solid #e5e7eb; }
+      td { border-bottom: 1px solid #f3f4f6; }
+      td.amount, th.amount { text-align: right; font-variant-numeric: tabular-nums; }
+      .totals { margin-top: 8mm; display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; }
+      .totals .card { padding: 4mm; border: 1px solid #e5e7eb; border-radius: 4px; }
+      .net { margin-top: 6mm; padding: 5mm; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+      .net strong { font-size: 14pt; color: #065f46; }
+      footer { margin-top: 12mm; font-size: 9pt; color: #9ca3af; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <h1>{{ company_name }}</h1>
+        <div class="muted">Payslip — {{ period_label }}</div>
+      </div>
+      <div class="muted">Generated {{ generated_on }}</div>
+    </div>
+
+    <div class="meta">
+      <div><strong>Employee</strong><span>{{ employee_name }}</span></div>
+      <div><strong>Code</strong><span>{{ employee_code }}</span></div>
+      <div><strong>Designation</strong><span>{{ designation }}</span></div>
+      <div><strong>Paid days</strong><span>{{ payslip.paid_days }} / {{ payslip.working_days }}</span></div>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Earnings</th><th class="amount">Amount</th></tr>
+      </thead>
+      <tbody>
+        {% for line in payslip.earnings %}
+        <tr><td>{{ line.name }}</td><td class="amount">{{ line.amount | money }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <table>
+      <thead>
+        <tr><th>Deductions</th><th class="amount">Amount</th></tr>
+      </thead>
+      <tbody>
+        {% for line in payslip.deductions %}
+        <tr><td>{{ line.name }}</td><td class="amount">{{ line.amount | money }}</td></tr>
+        {% else %}
+        <tr><td colspan="2" class="muted">No deductions this period.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <div class="card"><strong>Total earnings</strong><div class="amount">{{ payslip.total_earnings | money }}</div></div>
+      <div class="card"><strong>Total deductions</strong><div class="amount">{{ payslip.total_deductions | money }}</div></div>
+    </div>
+
+    <div class="net">
+      <span>Net pay</span>
+      <strong>{{ payslip.net_pay | money }}</strong>
+    </div>
+
+    <footer>This is a system-generated payslip and does not require a signature.</footer>
+  </body>
+</html>

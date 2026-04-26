@@ -1,0 +1,18 @@
+{
+  "name": "@techbirds/api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/run-dev.cjs",
+    "build": "echo 'no build for python api'",
+    "lint": "ruff check .",
+    "typecheck": "mypy app",
+    "test": "pytest -q",
+    "migrate": "alembic upgrade head",
+    "migration": "alembic revision --autogenerate -m",
+    "clean": "rimraf .pytest_cache .ruff_cache .mypy_cache __pycache__"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1"
+  }
+}

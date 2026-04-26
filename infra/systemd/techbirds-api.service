@@ -1,0 +1,39 @@
+[Unit]
+Description=TechBirds API (FastAPI / gunicorn-uvicorn)
+After=network.target postgresql.service redis-server.service
+Wants=postgresql.service redis-server.service
+
+[Service]
+Type=notify
+User=techbirds
+Group=techbirds
+WorkingDirectory=/srv/techbirds/api
+EnvironmentFile=/srv/techbirds/api/.env
+ExecStart=/srv/techbirds/api/.venv/bin/gunicorn \
+    app.main:app \
+    --workers 4 \
+    --worker-class uvicorn.workers.UvicornWorker \
+    --bind 127.0.0.1:8000 \
+    --access-logfile - \
+    --error-logfile - \
+    --timeout 120 \
+    --graceful-timeout 30
+Restart=on-failure
+RestartSec=5s
+KillSignal=SIGTERM
+TimeoutStopSec=30s
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/techbirds/api/var
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

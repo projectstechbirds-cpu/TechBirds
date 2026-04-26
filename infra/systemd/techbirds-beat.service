@@ -1,0 +1,25 @@
+[Unit]
+Description=TechBirds Celery beat (scheduler)
+After=network.target redis-server.service
+Wants=redis-server.service
+
+[Service]
+Type=simple
+User=techbirds
+Group=techbirds
+WorkingDirectory=/srv/techbirds/api
+EnvironmentFile=/srv/techbirds/api/.env
+ExecStart=/srv/techbirds/api/.venv/bin/celery -A app.tasks.celery_app beat \
+    --loglevel=info \
+    --schedule=/srv/techbirds/api/var/celerybeat-schedule
+Restart=on-failure
+RestartSec=5s
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/techbirds/api/var
+
+[Install]
+WantedBy=multi-user.target

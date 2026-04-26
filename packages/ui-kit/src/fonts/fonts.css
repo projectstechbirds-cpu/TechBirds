@@ -1,0 +1,5 @@
+/* Inter Variable via Fontsource (declared on @techbirds/ui-kit) */
+@import "@fontsource-variable/inter/index.css";
+
+/* Söhne Mono is a paid font — substitute JetBrains Mono until licensed */
+@import "@fontsource-variable/jetbrains-mono/index.css";
