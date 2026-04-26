@@ -406,7 +406,7 @@ async def payslip_url(
     return SignedUrlOut(url=url, expires_in=300)
 
 
-@router.delete("/payslips/{payslip_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/payslips/{payslip_id}", status_code=status.HTTP_200_OK)
 async def delete_payslip(
     payslip_id: UUID,
     payload: PayslipDelete,
