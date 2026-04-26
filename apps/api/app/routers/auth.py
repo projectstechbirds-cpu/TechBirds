@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import get_settings
@@ -24,7 +25,7 @@ from app.deps.auth import (
     current_user,
     role_names,
 )
-from app.models.auth import User, UserSession
+from app.models.auth import User, UserRole, UserSession
 from app.schemas.auth import AuthOk, GenericOk, OtpRequest, OtpVerify, UserPublic
 from app.services.email import send_otp_email
 from app.services.jwt import (
@@ -108,7 +109,7 @@ async def otp_request(
     if not await check_rate_limit(f"otp:ip:{ip}", limit=20, window_seconds=900):
         raise HTTPException(status_code=429, detail="Too many requests")
 
-    user = await session.scalar(select(User).where(User.email == email, User.is_active.is_(True)))
+    user = await session.scalar(select(User).where(User.email == email, User.is_active.is_(True)).options(selectinload(User.roles).selectinload(UserRole.role)))
     # Always 200 — never reveal whether an email exists.
     if user is None:
         return GenericOk()
@@ -138,7 +139,7 @@ async def otp_verify(
     if not await verify_otp(session, email=email, code=payload.code):
         raise HTTPException(status_code=400, detail="Invalid or expired code")
 
-    user = await session.scalar(select(User).where(User.email == email, User.is_active.is_(True)))
+    user = await session.scalar(select(User).where(User.email == email, User.is_active.is_(True)).options(selectinload(User.roles).selectinload(UserRole.role)))
     if user is None:
         # Stale OTP for a now-deactivated user — treat as invalid.
         raise HTTPException(status_code=400, detail="Invalid or expired code")

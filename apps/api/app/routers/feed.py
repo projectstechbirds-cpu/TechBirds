@@ -117,7 +117,7 @@ async def create_post(
     return await _post_to_out(session, post, viewer=viewer)
 
 
-@router.delete("/posts/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/posts/{post_id}", status_code=status.HTTP_200_OK)
 async def delete_post(
     post_id: UUID,
     viewer: User = Depends(current_user),

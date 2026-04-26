@@ -190,7 +190,7 @@ async def document_url(
     return SignedUrlOut(url=storage.signed_url(settings.R2_BUCKET_FILES, doc.r2_key), expires_in=300)
 
 
-@router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{document_id}", status_code=status.HTTP_200_OK)
 async def delete_document(
     document_id: UUID,
     payload: DocumentDelete,
